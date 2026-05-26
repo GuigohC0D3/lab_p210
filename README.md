@@ -62,7 +62,9 @@ source venv/bin/activate  # Linux/Mac
 
 # 2. Instalar dependências
 pip install -r requirements.txt
-pip install flash-attn --no-build-isolation  # requer compilação CUDA
+
+# 3. Instalar FlashAttention-2 (requer Long Path habilitado no Windows — ver abaixo)
+pip install flash-attn --no-build-isolation
 
 # 3. Executar o pipeline
 python -m src.main
@@ -71,6 +73,16 @@ python -m src.main
 **Requisitos de hardware:**
 - GPU NVIDIA com suporte a CUDA (mínimo 8 GB VRAM recomendado)
 - FlashAttention-2 requer GPU com compute capability ≥ 8.0 (Ampere ou superior: RTX 3000+, A100, H100)
+
+**Windows — Long Path (obrigatório para flash-attn):**
+
+O `flash-attn` compila do código-fonte e usa caminhos de arquivo maiores que 260 caracteres.
+Execute o comando abaixo no PowerShell **como Administrador** e reinicie o terminal:
+
+```powershell
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+  -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
 
 ---
 

@@ -2,6 +2,5 @@ torch
 transformers
 bitsandbytes
 accelerate
-flash-attn
 matplotlib
 pandas
