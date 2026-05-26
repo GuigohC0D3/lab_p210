@@ -1,0 +1,3 @@
+MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+MAX_NEW_TOKENS = 100
+RAG_CONTEXT_SLICE = 8000
