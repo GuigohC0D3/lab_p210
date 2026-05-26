@@ -61,11 +61,11 @@ source venv/bin/activate  # Linux/Mac
 # venv\Scripts\activate   # Windows
 
 # 2. Instalar dependências
-pip install torch transformers bitsandbytes accelerate
-pip install flash-attn --no-build-isolation
+pip install -r requirements.txt
+pip install flash-attn --no-build-isolation  # requer compilação CUDA
 
-# 3. Executar o notebook
-jupyter notebook lab10.ipynb
+# 3. Executar o pipeline
+python -m src.main
 ```
 
 **Requisitos de hardware:**
@@ -78,9 +78,17 @@ jupyter notebook lab10.ipynb
 
 ```
 lab_p210/
-├── lab10.ipynb          # Notebook principal com todo o pipeline
-├── benchmark_results.png  # Gráfico comparativo (gerado ao executar o notebook)
-└── README.md            # Este arquivo
+├── src/
+│   ├── config.py        # MODEL_ID e constantes
+│   ├── utils.py         # helpers de VRAM e CUDA
+│   ├── rag.py           # geração do contexto RAG (~12k tokens)
+│   ├── model.py         # carregamento QLoRA 4-bit + FlashAttention-2
+│   ├── benchmark.py     # geração com/sem KV Cache + métricas
+│   ├── visualize.py     # relatório comparativo + gráfico
+│   └── main.py          # orquestrador do pipeline
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
 ---
