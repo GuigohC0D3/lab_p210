@@ -65,11 +65,11 @@ def build_input_ids(
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
-    input_ids = tokenizer.apply_chat_template(
+    token_list = tokenizer.apply_chat_template(
         messages,
         tokenize=True,
         add_generation_prompt=True,
-        return_tensors="pt",
-    ).to(device)
+    )
+    input_ids = torch.tensor([token_list], dtype=torch.long).to(device)
     print(f"Tokens de entrada (com template de chat): {input_ids.shape[1]:,}")
     return input_ids
