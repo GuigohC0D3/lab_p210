@@ -9,7 +9,7 @@
 Pipeline de IA ponta a ponta simulando um ambiente de produção onde:
 1. Um **RAG** recupera ~12.000 tokens de manuais médicos fictícios
 2. Um modelo **Llama** quantizado em **4-bits (QLoRA)** processa o contexto
-3. A geração é otimizada com **KV Cache** + **FlashAttention-2** para evitar OOM na GPU
+3. A geração é otimizada com **KV Cache** + **FlashAttention-2** (ou **SDPA** como fallback automático) para evitar OOM na GPU
 
 ---
 
@@ -33,7 +33,7 @@ Pipeline de IA ponta a ponta simulando um ambiente de produção onde:
 | Configuração | Tempo (s) | Velocidade (tok/s) | Pico VRAM (MB) |
 |---|---|---|---|
 | **Sem KV Cache** (baseline) | ~45–90s | ~1–2 | ~4.000–6.000 |
-| **KV Cache + FlashAttention-2** | ~3–8s | ~15–30 | ~1.200–1.800 |
+| **KV Cache + FlashAttention-2 / SDPA** | ~3–8s | ~15–30 | ~1.200–1.800 |
 | **Ganho** | **~10–15x mais rápido** | — | **~70% menos VRAM** |
 
 > Execute `lab10.ipynb` para obter os valores exatos na sua GPU.
@@ -63,26 +63,14 @@ source venv/bin/activate  # Linux/Mac
 # 2. Instalar dependências
 pip install -r requirements.txt
 
-# 3. Instalar FlashAttention-2 (requer Long Path habilitado no Windows — ver abaixo)
-pip install flash-attn --no-build-isolation
-
 # 3. Executar o pipeline
 python -m src.main
 ```
 
 **Requisitos de hardware:**
-- GPU NVIDIA com suporte a CUDA (mínimo 8 GB VRAM recomendado)
-- FlashAttention-2 requer GPU com compute capability ≥ 8.0 (Ampere ou superior: RTX 3000+, A100, H100)
-
-**Windows — Long Path (obrigatório para flash-attn):**
-
-O `flash-attn` compila do código-fonte e usa caminhos de arquivo maiores que 260 caracteres.
-Execute o comando abaixo no PowerShell **como Administrador** e reinicie o terminal:
-
-```powershell
-New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
-  -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
-```
+- GPU NVIDIA com suporte a CUDA (mínimo 4 GB VRAM)
+- GPU com compute capability ≥ 8.0 (Ampere+: RTX 3000+, A100, H100) → usa **FlashAttention-2**
+- GPU com compute capability < 8.0 (T4, V100, etc.) → fallback automático para **SDPA** (PyTorch nativo)
 
 ---
 
@@ -94,7 +82,7 @@ lab_p210/
 │   ├── config.py        # MODEL_ID e constantes
 │   ├── utils.py         # helpers de VRAM e CUDA
 │   ├── rag.py           # geração do contexto RAG (~12k tokens)
-│   ├── model.py         # carregamento QLoRA 4-bit + FlashAttention-2
+│   ├── model.py         # carregamento QLoRA 4-bit + FlashAttention-2 / SDPA
 │   ├── benchmark.py     # geração com/sem KV Cache + métricas
 │   ├── visualize.py     # relatório comparativo + gráfico
 │   └── main.py          # orquestrador do pipeline
