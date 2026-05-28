@@ -32,11 +32,11 @@ Pipeline de IA ponta a ponta simulando um ambiente de produção onde:
 
 | Configuração | Tempo (s) | Velocidade (tok/s) | Pico VRAM (MB) |
 |---|---|---|---|
-| **Sem KV Cache** (baseline) | ~45–90s | ~1–2 | ~4.000–6.000 |
-| **KV Cache + FlashAttention-2 / SDPA** | ~3–8s | ~15–30 | ~1.200–1.800 |
-| **Ganho** | **~10–15x mais rápido** | — | **~70% menos VRAM** |
+| **Sem KV Cache** (baseline) | 181.44 | 0.55 | 3.135 |
+| **KV Cache + SDPA** | 7.59 | 13.18 | 3.038 |
+| **Ganho** | **~24x mais rápido** | — | **~3% menos VRAM** |
 
-> Execute `lab10.ipynb` para obter os valores exatos na sua GPU.
+> Valores medidos em GPU NVIDIA T4 (Google Colab). A redução de VRAM entre os dois modos é pequena pois o QLoRA 4-bit já comprime o modelo em ambos os casos — o ganho principal é de velocidade.
 
 ---
 
