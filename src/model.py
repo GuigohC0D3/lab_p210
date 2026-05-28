@@ -18,25 +18,35 @@ def load_tokenizer() -> AutoTokenizer:
     return AutoTokenizer.from_pretrained(MODEL_ID)
 
 
+def _resolve_attn_impl(flash_attention: bool) -> str | None:
+    """Returns flash_attention_2 for Ampere+, sdpa for older GPUs, None if disabled."""
+    if not flash_attention or not torch.cuda.is_available():
+        return None
+    major, _ = torch.cuda.get_device_capability()
+    return "flash_attention_2" if major >= 8 else "sdpa"
+
+
 def load_model(
     bnb_config: BitsAndBytesConfig,
     flash_attention: bool = False,
-) -> tuple[AutoModelForCausalLM, float]:
+) -> tuple[AutoModelForCausalLM, float, str]:
     reset_cuda_stats()
     vram_before = vram_allocated_mb()
 
+    attn_impl = _resolve_attn_impl(flash_attention)
     kwargs = dict(
         quantization_config=bnb_config,
         device_map="auto",
         torch_dtype=torch.float16,
     )
-    if flash_attention:
-        kwargs["attn_implementation"] = "flash_attention_2"
+    if attn_impl:
+        kwargs["attn_implementation"] = attn_impl
+        print(f"Attention implementation: {attn_impl}")
 
     model = AutoModelForCausalLM.from_pretrained(MODEL_ID, **kwargs)
 
     vram_used = vram_allocated_mb() - vram_before
-    return model, vram_used
+    return model, vram_used, attn_impl or "eager"
 
 
 def build_input_ids(

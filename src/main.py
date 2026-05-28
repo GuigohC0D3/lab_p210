@@ -16,7 +16,7 @@ def main() -> None:
 
     # Passo 1: carregar modelo com QLoRA 4-bit
     print("\n=== PASSO 1: Carregamento QLoRA 4-bits ===")
-    model, vram_model_mb = load_model(bnb_config, flash_attention=False)
+    model, vram_model_mb, _ = load_model(bnb_config, flash_attention=False)
     print(f"VRAM ocupada pelo modelo quantizado (4-bit): {vram_model_mb:.1f} MB")
     print(f"(Equivalente em float16 seria ~2.200 MB — redução de ~75%)")
 
@@ -35,9 +35,9 @@ def main() -> None:
     reset_cuda_stats()
     gc.collect()
 
-    model_opt, vram_opt = load_model(bnb_config, flash_attention=True)
-    print(f"Modelo com FlashAttention-2 carregado. VRAM: {vram_opt:.1f} MB")
-    optimized = run_with_cache(model_opt, tokenizer, input_ids)
+    model_opt, vram_opt, attn_used = load_model(bnb_config, flash_attention=True)
+    print(f"Modelo otimizado carregado ({attn_used}). VRAM: {vram_opt:.1f} MB")
+    optimized = run_with_cache(model_opt, tokenizer, input_ids, attn_label=attn_used)
 
     # Relatório final
     print("\n=== RELATÓRIO COMPARATIVO FINAL ===")

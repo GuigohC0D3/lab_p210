@@ -47,6 +47,7 @@ def run_with_cache(
     model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
     input_ids: torch.Tensor,
+    attn_label: str = "FlashAttention-2",
 ) -> dict:
     model.config.use_cache = True
     output, elapsed = _generate(model, input_ids, use_cache=True)
@@ -55,11 +56,11 @@ def run_with_cache(
     text = tokenizer.decode(output[0, input_ids.shape[1]:], skip_special_tokens=True)
     peak_vram = vram_peak_mb()
 
-    print(f"\n=== MÉTRICA PASSO 4 — COM KV CACHE + FLASHATTENTION-2 ===")
+    print(f"\n=== MÉTRICA PASSO 4 — COM KV CACHE + {attn_label.upper()} ===")
     print(f"Tokens gerados: {n_generated}")
     print(f"Tempo total de geração: {elapsed:.2f}s")
     print(f"Velocidade: {n_generated / elapsed:.2f} tokens/s")
     print(f"Pico de VRAM: {peak_vram:.1f} MB")
     print(f"\nTexto gerado (primeiros 300 chars):\n{text[:300]}")
 
-    return {"label": "KV Cache + FlashAttention-2", "time": elapsed, "tokens": n_generated, "vram": peak_vram}
+    return {"label": f"KV Cache + {attn_label}", "time": elapsed, "tokens": n_generated, "vram": peak_vram}
