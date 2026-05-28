@@ -61,7 +61,7 @@ TITULOS = [
 def build_rag_context(tokenizer: AutoTokenizer) -> tuple[str, int]:
     capitulos = [CAPITULO_TEMPLATE.format(n=i + 1, titulo=TITULOS[i]) * 4 for i in range(5)]
     contexto = "\n\n".join(capitulos)
-    n_tokens = tokenizer(contexto, return_tensors="pt")["input_ids"].shape[1]
+    n_tokens = len(tokenizer.encode(contexto))
     print(f"=== MÉTRICA PASSO 2 ===")
     print(f"Tokens no contexto RAG: {n_tokens:,}")
     print(f"Caracteres no texto: {len(contexto):,}")
